@@ -1,9 +1,270 @@
 <!DOCTYPE html>
 <html>
 <head>
-	<title>Api Pixel</title>
+	<title>Challenge Pixel Pay</title>	
+	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.13.1/css/alertify.css">
+	<link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.13.1/css/themes/bootstrap.css">
 </head>
 <body>
-	Hola
+	<div class="container">	
+		</br>		
+		<h1 class="text-primary text-center">Pixel Pay Challenge</h1>
+		</br>	
+ 		<div class="row"> 			
+ 			<div class="col-md-5">
+ 				<div class="card">
+ 					<div class="card-header">
+ 						<h4>Agregar</h4>
+ 						 <input type="text" id="nombre" class="form-control" aria-label="Large" aria-describedby="inputGroup-sizing-sm" placeholder="Escribe y presiona enter para agregar un quehacer" >
+ 					</div>
+ 					<div class="card-body">
+ 						
+ 					</div>
+ 				</div>
+ 				
+ 			</div>
+ 			<div class="col-md-7">
+ 				
+ 				<div class="row">
+				    <div class="col-6">
+				      <h4> Listado de Quehaceres</h4>
+				    </div>				    
+				    <div class="col-3">
+				      <button type="button" onclick="aplicacion.eliminarMarcados()" class="btn btn-warning btn-sm">Borrar marcados</button>
+				    </div>
+				    <div class="col-3">
+				      <button type="button" onclick="aplicacion.eliminarTodo()" class="btn btn-danger btn-sm">Borrar todo</button>
+				    </div>
+				 </div> 				
+ 				<hr/>
+ 				<div id="quehaceres"> 						
+				</div> 			
+ 			</div>
+	</div>
+	
+	<script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.12.9/dist/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/AlertifyJS/1.13.1/alertify.js"></script>
+
+	<script>
+		
+		var url="http://localhost/PPChallenge";		
+
+		var aplicacion = new function(){
+			this.nombre = document.getElementById("nombre");
+
+			this.quehaceres = document.getElementById("quehaceres");
+
+			this.status = document.getElementById("inlineFormCheck");
+
+			this.leer = function(){
+				var datos="";		
+
+				fetch(url)
+				.then(r=>r.json())
+				.then((respuesta)=>{
+					console.log(respuesta)
+
+					respuesta.map(
+						function(quehacer,index,array){
+							console.log(quehacer.estado)
+
+							if(quehacer.success===0){
+								datos+=`<ul class="list-group alert alert-danger">
+									<div class="form-check mb-2 mr-sm-2">
+							       		<p>No hay registros</p>							       		
+							  	    </div>
+							  	   	</ul>`
+							}else{
+								if(quehacer.estado==='0'){
+								datos+=`<ul class="`+quehacer.id+` list-group" id="`+quehacer.id+`">
+									<div class="form-check mb-2 mr-sm-2">
+							       		<input onchange="aplicacion.marcar()" class="N" type="checkbox" 
+							       		id="`+quehacer.id+`" value="`+quehacer.nombre+`">
+							       		<label class="form-check-label" for="`+quehacer.id+`">
+							      			`+quehacer.nombre+
+							    		`</label>
+							  	    </div>
+							  	   	</ul>
+								  	<hr/>`;
+								}else{
+									datos+=`<ul class="`+quehacer.id+` list-group alert alert-success" id="`+quehacer.id+`">
+										<div class="form-check mb-2 mr-sm-2">
+								       		<input onchange="aplicacion.marcar()" class="N" type="checkbox" checked="true"
+								       		id="`+quehacer.id+`" value="`+quehacer.nombre+`">
+								       		<label class="form-check-label" for="`+quehacer.id+`">
+								      			`+quehacer.nombre+
+								    		`</label>
+								  	    </div>
+								  	   	</ul>
+									  	<hr/>`;
+								}
+							}						
+							
+						}
+
+					);
+					return this.quehaceres.innerHTML=datos;
+				})
+				.catch(console.log)				
+				
+			}
+
+			this.agregar = function(){
+				console.log(nombre.value);
+
+				var datosEnviar = {nombre: this.nombre.value}
+
+				fetch(url+"?insertar=1",{method:"POST",body:JSON.stringify(datosEnviar)})
+				.then(r=>r.json())
+				.then((respuesta)=>{
+					console.log("Datos insertados");
+					nombre.value = '';
+					this.leer();					
+				})
+				.catch(console.log)	
+			}
+
+			this.marcar=function(){
+
+				var checkBoxes = document.querySelectorAll("input[type=checkbox]");
+
+
+			    Array.from(checkBoxes) 
+			      .filter(i => i.checked) 
+			      .map(function(quehacer,index,array){
+
+			      	var someElement= document.getElementById(quehacer.id);
+			      	//console.log(quehacer.checked)	
+
+			      	if(quehacer.checked){			      		
+
+	    				var datosE = {estado: quehacer.checked}
+
+						fetch(url+"?actualizarC=" + quehacer.id,{method:"POST",body:JSON.stringify(datosE)})
+						.then(r=>r.json())
+						.then((respuesta)=>{
+							console.log("Quehacer completado");	
+							aplicacion.leer();											
+						})
+						.catch(console.log)	
+			      	}	         
+
+			      }) 
+
+			    //this.leer();
+
+			    Array.from(checkBoxes) 
+			      .filter(i => !i.checked) 
+			      .map(function(quehacer,index,array){
+
+			      	var someElement= document.getElementById(quehacer.id);	
+
+			      	if(!quehacer.checked){
+
+			      		var datosE = {estado: quehacer.checked}
+			      		//console.log(quehacer.id)					    					    
+	    				fetch(url+"?actualizarNC=" + quehacer.id,{method:"POST",body:JSON.stringify(datosE)})
+						.then(r=>r.json())
+						.then((respuesta)=>{
+							console.log("Quehacer no completado");	
+							aplicacion.leer();											
+						})
+						.catch(console.log)	
+			      	}	           
+
+			      }) 
+
+			    //this.leer();						
+			}
+
+			this.eliminarMarcados=function(){
+				var marcados = document.querySelectorAll("input[type=checkbox]");
+
+
+			    Array.from(marcados) 
+			      .filter(i => i.checked) 
+			      .map(function(quehacer,index,array){
+
+			      	if(quehacer.checked){		
+
+	    				alertify.confirm("¿Estás seguro de eliminar elemento(s) marcado(s)?",
+						  function(){						  	
+						  	fetch(url+"?eliminarC="+quehacer.checked)
+							.then(r=>r.json())
+							.then((respuesta)=>{								
+								alertify.success('¡Elemento(s) eliminado(s) exitosamente!');
+								aplicacion.leer();
+								console.log("Quehaceres eliminados")									
+							})
+							.catch(console.log)							    
+						  },
+						  function(){
+						    alertify.error('¡Operación cancelada!');						    
+						  });					
+			      	}	     
+
+			      }) 		    
+			}
+
+			this.eliminarTodo=function(){
+				var todos = document.querySelectorAll("input[type=checkbox]");
+				var ul = document.querySelectorAll("ul[class*='list-group']");
+	            todos.forEach((element) => {
+		            if (element.checked) {
+		              return false
+		            } else {
+		              fetch(url+"?actualizarTodo")
+						.then(r=>r.json())
+						.then((respuesta)=>{								
+							element.checked = true 
+							
+							console.log("Quehaceres marcados")									
+						})
+						.catch(console.log)		
+		            }
+	            })
+
+	            ul.forEach((ele)=>{
+	            	ele.className+= " alert alert-success"
+	            })
+
+	            aplicacion.leer();
+
+	            alertify.confirm("¿Estás seguro de eliminar todos los elementos?",
+				  function(){						  	
+				  	fetch(url+"?eliminarTodo")
+					.then(r=>r.json())
+					.then((respuesta)=>{								
+						alertify.success('¡Elementos eliminados exitosamente!');
+						aplicacion.leer();
+						console.log("Quehaceres eliminados")									
+					})
+					.catch(console.log)							    
+				  },
+				  function(){
+				    alertify.error('¡Operación cancelada!');						    
+					  });		
+		    
+			}
+
+		}
+
+		aplicacion.leer();	
+		
+		$(document).ready(function() 
+            {              	              
+              $('#nombre').keypress(function(e){   
+               if(e.which == 13){      
+                 aplicacion.agregar();      
+               }   
+              });  
+           });  
+
+	</script>
+
 </body>
 </html>
