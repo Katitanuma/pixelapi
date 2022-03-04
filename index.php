@@ -6,11 +6,21 @@
 	header("Access-Control-Allow-Headers: Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
 
 	// Conecta a la base de datos  con usuario, contraseña y nombre de la BD
-	$servidor = "localhost"; 
+	/*$servidor = "localhost"; 
 	$usuario = "root"; 
 	$contrasenia = ""; 
 	$nombreBaseDatos = "quehaceres";
-	$conexionBD = new mysqli($servidor, $usuario, $contrasenia, $nombreBaseDatos);
+	$conexionBD = new mysqli($servidor, $usuario, $contrasenia, $nombreBaseDatos);*/
+
+	$cleardb_url = parse_url(getenv("CLEARDB_DATABASE_URL"));
+	$cleardb_server = $cleardb_url["host"];
+	$cleardb_username = $cleardb_url["user"];
+	$cleardb_password = $cleardb_url["pass"];
+	$cleardb_db = substr($cleardb_url["path"],1);
+	$active_group = 'default';
+	$query_builder = TRUE;
+	// Connect to DB
+	$conexionBD = mysqli_connect($cleardb_server, $cleardb_username, $cleardb_password, $cleardb_db);
 
 
 	// Consulta datos y recepciona una clave para consultar dichos datos con dicha clave
